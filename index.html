@@ -142,10 +142,15 @@
       .then(response => response.json())
       .then(data => {
         if (data.result === 'success') {
+          // สร้าง URL สำหรับ QR Code
+          var qrCodeUrl = 'https://chart.googleapis.com/chart?cht=qr&chs=200x200&chl=' + encodeURIComponent('ลำดับคิวของคุณคือ ' + data.queueNumber);
+
           Swal.fire({
             icon: 'success',
             title: 'สำเร็จ!',
             text: 'ลำดับคิวของคุณคือ ' + data.queueNumber,
+            imageUrl: qrCodeUrl, // ใช้ URL ของ QR Code
+            imageAlt: 'Queue QR Code',
             confirmButtonText: 'ตกลง'
           }).then(function() {
             document.getElementById('queueForm').reset();
