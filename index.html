@@ -86,7 +86,7 @@
 <body>
   <div class="container">
     <div class="form-box">
-      <h1>คลินิกนายแพทย์เฉลิมรัตน์4</h1>
+      <h1>คลินิกนายแพทย์เฉลิมรัตน์5</h1>
       <p id="date">บัตรคิวประจำวันที่: [วัน เดือน ปี]</p>
       <form id="queueForm" class="was-validated" autocomplete="off" onsubmit="return submitForm(event)">
         <div class="form-group">
@@ -145,7 +145,7 @@
           Swal.fire({
             icon: 'success',
             title: 'สำเร็จ!',
-            text: 'ลำดับคิวของคุณคือ ' + data.row,
+            text: 'ลำดับคิวของคุณคือ ' + data.queueNumber,
             confirmButtonText: 'ตกลง'
           }).then(function() {
             document.getElementById('queueForm').reset();
