@@ -86,7 +86,7 @@
 <body>
   <div class="container">
     <div class="form-box">
-      <h1>คลินิกนายแพทย์เฉลิมรัตน์</h1>
+      <h1>คลินิกนายแพทย์เฉลิมรัตน์2</h1>
       <p id="date">บัตรคิวประจำวันที่: [วัน เดือน ปี]</p>
       <form id="queueForm" class="was-validated" autocomplete="off" onsubmit="return submitForm(event)">
         <div class="form-group">
@@ -101,8 +101,6 @@
           <div class="invalid-feedback">กรุณาป้อนเบอร์โทรให้ครบ 10 หลัก</div>
         </div>
         <input type="hidden" id="userId" name="userId">
-        <input type="hidden" id="displayName" name="displayName">
-        <input type="hidden" id="pictureUrl" name="pictureUrl">
         <button type="submit" class="btn btn-primary bd-indigo-500 btn-block text-white"><i class="fas fa-paper-plane"></i> กดรับคิว</button>
       </form>
     </div>
@@ -121,8 +119,6 @@
     async function getUserProfile() {
       const profile = await liff.getProfile();
       document.getElementById('userId').value = profile.userId;
-      document.getElementById('displayName').value = profile.displayName;
-      document.getElementById('pictureUrl').value = profile.pictureUrl;
     }
 
     function submitForm(event) {
@@ -144,15 +140,24 @@
         body: formData
       })
       .then(response => response.json())
-      .then(result => {
-        Swal.fire({
-          icon: 'success',
-          title: 'สำเร็จ!',
-          text: 'ลำดับคิวของคุณคือ ' + result.message,
-          confirmButtonText: 'ตกลง'
-        }).then(function() {
-          document.getElementById('queueForm').reset();
-        });
+      .then(data => {
+        if (data.result === 'success') {
+          Swal.fire({
+            icon: 'success',
+            title: 'สำเร็จ!',
+            text: 'ลำดับคิวของคุณคือ ' + data.row,
+            confirmButtonText: 'ตกลง'
+          }).then(function() {
+            document.getElementById('queueForm').reset();
+          });
+        } else {
+          Swal.fire({
+            icon: 'error',
+            title: 'เกิดข้อผิดพลาด',
+            text: data.error,
+            confirmButtonText: 'ตกลง'
+          });
+        }
       })
       .catch(error => {
         console.error('Error!', error.message);
