@@ -86,7 +86,7 @@
 <body>
   <div class="container">
     <div class="form-box">
-      <h1>คลินิกนายแพทย์เฉลิมรัตน์5</h1>
+      <h1>คลินิกนายแพทย์เฉลิมรัตน์</h1>
       <p id="date">บัตรคิวประจำวันที่: [วัน เดือน ปี]</p>
       <form id="queueForm" class="was-validated" autocomplete="off" onsubmit="return submitForm(event)">
         <div class="form-group">
@@ -142,8 +142,8 @@
       .then(response => response.json())
       .then(data => {
         if (data.result === 'success') {
-          // สร้าง URL สำหรับ QR Code โดยใช้ qrserver.com
-          var qrCodeUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=' + encodeURIComponent('ลำดับคิวของคุณคือ ' + data.queueNumber);
+          // สร้าง URL สำหรับ QR Code โดยใช้ quickchart.io
+          var qrCodeUrl = 'https://quickchart.io/qr?text=' + encodeURIComponent('ลำดับคิวของคุณคือ ' + data.queueNumber);
 
           Swal.fire({
             icon: 'success',
