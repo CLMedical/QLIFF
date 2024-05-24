@@ -108,7 +108,7 @@
 
   <script>
     async function initializeLiff() {
-      await liff.init({ liffId: '1654186914-NeyYjmZp' }); // จุดที่ 1: ใส่ LIFF ID ที่ได้รับ
+      await liff.init({ liffId: '1654186914-NeyYjmZp' });
       if (!liff.isLoggedIn()) {
         liff.login();
       } else {
@@ -118,14 +118,16 @@
 
     async function getUserProfile() {
       const profile = await liff.getProfile();
+      
       document.getElementById('userId').value = profile.userId;
     }
 
     function submitForm(event) {
       event.preventDefault(); // ป้องกันการส่งฟอร์มแบบปกติ
 
-      var form = document.getElementById('queueForm');
-      var formData = new FormData(form);
+      var name = document.getElementById('name').value;
+      var phoneNumber = document.getElementById('phoneNumber').value;
+      var userId = document.getElementById('userId').value;
 
       Swal.fire({
         title: 'กำลังส่งข้อมูล...',
@@ -135,22 +137,25 @@
         }
       });
 
-      fetch('https://script.google.com/macros/s/AKfycbwHuAbDGhIcS3H0DLLSMyMBbxmqv2lbwQYhzhz7R4HrYTxTUaVr1ZH_XL2CCb9y7-jp/exec', { // จุดที่ 2: ใส่ Script URL ที่ได้รับ
+      fetch('https://script.google.com/macros/s/AKfycbwHuAbDGhIcS3H0DLLSMyMBbxmqv2lbwQYhzhz7R4HrYTxTUaVr1ZH_XL2CCb9y7-jp/exec', {
         method: 'POST',
-        body: formData
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: new URLSearchParams({
+          name: name,
+          phoneNumber: phoneNumber,
+          userId: userId
+        })
       })
       .then(response => response.json())
       .then(data => {
+        Swal.close();
         if (data.result === 'success') {
-          // สร้าง URL สำหรับ QR Code โดยใช้ quickchart.io
-          var qrCodeUrl = 'https://quickchart.io/qr?text=' + encodeURIComponent('ลำดับคิวของคุณคือ ' + data.queueNumber);
-
           Swal.fire({
             icon: 'success',
             title: 'สำเร็จ!',
             text: 'ลำดับคิวของคุณคือ ' + data.queueNumber,
-            imageUrl: qrCodeUrl, // ใช้ URL ของ QR Code
-            imageAlt: 'Queue QR Code',
             confirmButtonText: 'ตกลง'
           }).then(function() {
             document.getElementById('queueForm').reset();
@@ -158,18 +163,18 @@
         } else {
           Swal.fire({
             icon: 'error',
-            title: 'เกิดข้อผิดพลาด',
+            title: 'เกิดข้อผิดพลาด!',
             text: data.error,
             confirmButtonText: 'ตกลง'
           });
         }
       })
       .catch(error => {
-        console.error('Error!', error.message);
+        Swal.close();
         Swal.fire({
           icon: 'error',
-          title: 'เกิดข้อผิดพลาด',
-          text: 'ไม่สามารถส่งข้อมูลได้',
+          title: 'เกิดข้อผิดพลาด!',
+          text: error.message,
           confirmButtonText: 'ตกลง'
         });
       });
