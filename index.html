@@ -5,7 +5,6 @@
   <meta charset="UTF-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://static.line-scdn.net; connect-src 'self' https://api.line.me; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com;">
   <title>แบบฟอร์มการแจกบัตรคิว</title>
 
   <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -102,6 +101,8 @@
           <div class="invalid-feedback">กรุณาป้อนเบอร์โทรให้ครบ 10 หลัก</div>
         </div>
         <input type="hidden" id="userId" name="userId">
+        <input type="hidden" id="displayName" name="displayName">
+        <input type="hidden" id="pictureUrl" name="pictureUrl">
         <button type="submit" class="btn btn-primary bd-indigo-500 btn-block text-white"><i class="fas fa-paper-plane"></i> กดรับคิว</button>
       </form>
     </div>
@@ -109,7 +110,7 @@
 
   <script>
     async function initializeLiff() {
-      await liff.init({ liffId: 'YOUR_LIFF_ID' });
+      await liff.init({ liffId: 'YOUR_LIFF_ID' }); // จุดที่ 1: ใส่ LIFF ID ที่ได้รับ
       if (!liff.isLoggedIn()) {
         liff.login();
       } else {
@@ -120,14 +121,15 @@
     async function getUserProfile() {
       const profile = await liff.getProfile();
       document.getElementById('userId').value = profile.userId;
+      document.getElementById('displayName').value = profile.displayName;
+      document.getElementById('pictureUrl').value = profile.pictureUrl;
     }
 
     function submitForm(event) {
       event.preventDefault(); // ป้องกันการส่งฟอร์มแบบปกติ
 
-      var name = document.getElementById('name').value;
-      var phoneNumber = document.getElementById('phoneNumber').value;
-      var userId = document.getElementById('userId').value;
+      var form = document.getElementById('queueForm');
+      var formData = new FormData(form);
 
       Swal.fire({
         title: 'กำลังส่งข้อมูล...',
@@ -137,16 +139,30 @@
         }
       });
 
-      google.script.run.withSuccessHandler(function(message) {
+      fetch('https://script.google.com/macros/s/AKfycbwHuAbDGhIcS3H0DLLSMyMBbxmqv2lbwQYhzhz7R4HrYTxTUaVr1ZH_XL2CCb9y7-jp/exec', { // จุดที่ 2: ใส่ Script URL ที่ได้รับ
+        method: 'POST',
+        body: formData
+      })
+      .then(response => response.json())
+      .then(result => {
         Swal.fire({
           icon: 'success',
           title: 'สำเร็จ!',
-          text: 'ลำดับคิวของคุณคือ ' + message,
+          text: 'ลำดับคิวของคุณคือ ' + result.message,
           confirmButtonText: 'ตกลง'
         }).then(function() {
           document.getElementById('queueForm').reset();
         });
-      }).onSubmit({name: name, phoneNumber: phoneNumber, userId: userId});
+      })
+      .catch(error => {
+        console.error('Error!', error.message);
+        Swal.fire({
+          icon: 'error',
+          title: 'เกิดข้อผิดพลาด',
+          text: 'ไม่สามารถส่งข้อมูลได้',
+          confirmButtonText: 'ตกลง'
+        });
+      });
     }
 
     function displayTodayDate() {
