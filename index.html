@@ -142,8 +142,8 @@
       .then(response => response.json())
       .then(data => {
         if (data.result === 'success') {
-          // สร้าง URL สำหรับ QR Code
-          var qrCodeUrl = 'https://chart.googleapis.com/chart?cht=qr&chs=200x200&chl=' + encodeURIComponent('ลำดับคิวของคุณคือ ' + data.queueNumber);
+          // สร้าง URL สำหรับ QR Code โดยใช้ qrserver.com
+          var qrCodeUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=' + encodeURIComponent('ลำดับคิวของคุณคือ ' + data.queueNumber);
 
           Swal.fire({
             icon: 'success',
