@@ -84,84 +84,99 @@
   </style>
 </head>
 <body>
-    <h2>ระบบจองคิวล่วงหน้า</h2>
-    <form id="queueForm">
+  <div class="container">
+    <div class="form-box">
+      <h1>ระบบจองคิวล่วงหน้า</h1>
+      <form id="queueForm">
         <input type="hidden" id="userId" name="userId">
         
-        <label for="firstName">ชื่อ:</label><br>
-        <input type="text" id="firstName" name="firstName" required><br>
+        <div class="form-group">
+          <label for="firstName">ชื่อ:</label>
+          <input type="text" id="firstName" name="firstName" required>
+        </div>
         
-        <label for="lastName">นามสกุล:</label><br>
-        <input type="text" id="lastName" name="lastName" required><br>
+        <div class="form-group">
+          <label for="lastName">นามสกุล:</label>
+          <input type="text" id="lastName" name="lastName" required>
+        </div>
         
-        <label for="phone">เบอร์โทร:</label><br>
-        <input type="tel" id="phone" name="phone" required><br>
+        <div class="form-group">
+          <label for="phone">เบอร์โทร:</label>
+          <input type="tel" id="phone" name="phone" required>
+        </div>
         
-        <label for="symptoms">อาการ:</label><br>
-        <textarea id="symptoms" name="symptoms" required></textarea><br>
+        <div class="form-group">
+          <label for="symptoms">อาการ:</label>
+          <textarea id="symptoms" name="symptoms" required></textarea>
+        </div>
         
-        <label for="date">เลือกวันที่:</label><br>
-        <input type="date" id="date" name="date" required><br>
+        <div class="form-group">
+          <label for="date">เลือกวันที่:</label>
+          <input type="date" id="date" name="date" required>
+        </div>
         
-        <label for="time">เลือกเวลา:</label><br>
-        <input type="time" id="time" name="time" required><br>
+        <div class="form-group">
+          <label for="time">เลือกเวลา:</label>
+          <input type="time" id="time" name="time" required>
+        </div>
         
-        <input type="submit" value="จองคิว">
-    </form>
+        <button type="submit">จองคิว</button>
+      </form>
+      <p id="statusMessage"></p>
+    </div>
+  </div>
 
-    <p id="statusMessage"></p>
-
-    <script>
-        async function initializeLiff() {
-            try {
-                await liff.init({ liffId: "YOUR_LIFF_ID" });
-                if (liff.isLoggedIn()) {
-                    const profile = await liff.getProfile();
-                    document.getElementById('userId').value = profile.userId;
-                } else {
-                    liff.login();
-                }
-            } catch (error) {
-                console.error('LIFF initialization failed', error);
+  <script>
+    async function initializeLiff() {
+        try {
+            await liff.init({ liffId: "1654186914-NeyYjmZp" });
+            if (liff.isLoggedIn()) {
+                const profile = await liff.getProfile();
+                document.getElementById('userId').value = profile.userId;
+            } else {
+                liff.login();
             }
+        } catch (error) {
+            console.error('LIFF initialization failed', error);
         }
+    }
 
-        document.addEventListener('DOMContentLoaded', function() {
-            initializeLiff();
-        });
+    document.addEventListener('DOMContentLoaded', function() {
+        initializeLiff();
+    });
 
-        document.getElementById('queueForm').addEventListener('submit', function(event) {
-            event.preventDefault();
-            document.getElementById('statusMessage').textContent = 'กำลังส่งข้อมูล...';
+    document.getElementById('queueForm').addEventListener('submit', function(event) {
+        event.preventDefault();
+        document.getElementById('statusMessage').textContent = 'กำลังส่งข้อมูล...';
 
-            var formData = new FormData(this);
+        var formData = new FormData(this);
 
-            fetch('https://script.google.com/macros/s/AKfycbwHuAbDGhIcS3H0DLLSMyMBbxmqv2lbwQYhzhz7R4HrYTxTUaVr1ZH_XL2CCb9y7-jp/exec', {
-                method: 'POST',
-                body: JSON.stringify(Object.fromEntries(formData)),
-                headers: {
-                    'Content-Type': 'application/json'
-                }
-            }).then(response => response.json())
-              .then(data => {
-                document.getElementById('statusMessage').textContent = 'แจ้งเตือนนัดสำเร็จ';
-                sendFlexMessage(data);
-                sendLineNotify(data);
-              }).catch(error => {
-                document.getElementById('statusMessage').textContent = 'เกิดข้อผิดพลาดในการส่งข้อมูล';
-              });
-        });
+        fetch('https://script.google.com/macros/s/AKfycbwHuAbDGhIcS3H0DLLSMyMBbxmqv2lbwQYhzhz7R4HrYTxTUaVr1ZH_XL2CCb9y7-jp/exec', {
+            method: 'POST',
+            body: JSON.stringify(Object.fromEntries(formData)),
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        }).then(response => response.json())
+          .then(data => {
+            document.getElementById('statusMessage').textContent = 'แจ้งเตือนนัดสำเร็จ';
+            sendFlexMessage(data);
+            sendLineNotify(data);
+          }).catch(error => {
+            document.getElementById('statusMessage').textContent = 'เกิดข้อผิดพลาดในการส่งข้อมูล';
+          });
+    });
 
-        function sendFlexMessage(data) {
-            // ส่ง Flex Message ให้ลูกค้า
-        }
+    function sendFlexMessage(data) {
+        // ส่ง Flex Message ให้ลูกค้า
+    }
 
-        function sendLineNotify(data) {
-            // ส่งแจ้งเตือนร้านผ่าน LINE Notify
-        }
-    </script>
+    function sendLineNotify(data) {
+        // ส่งแจ้งเตือนร้านผ่าน LINE Notify
+    }
+  </script>
 
   <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.3/dist/umd/popper.min.js"></script>
-  <script src="https://stackpath.herokuapp.com/bootstrap/5.0.0-alpha1/js/bootstrap.min.js"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/5.0.0-alpha1/js/bootstrap.min.js"></script>
 </body>
 </html>
