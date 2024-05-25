@@ -84,121 +84,82 @@
   </style>
 </head>
 <body>
-  <div class="container">
-    <div class="form-box">
-      <h1>คลินิกนายแพทย์เฉลิมรัตน์</h1>
-      <p id="date">บัตรคิวประจำวันที่: [วัน เดือน ปี]</p>
-      <form id="queueForm" class="was-validated" autocomplete="off" onsubmit="return submitForm(event)">
-        <div class="form-group">
-          <label for="name">ชื่อ-นามสกุล:</label>
-          <input type="text" class="form-control" id="name" name="name" required>
-          <div class="invalid-feedback">กรุณาป้อนชื่อ-นามสกุล</div>
-        </div>
-        <div class="form-group">
-          <label for="phoneNumber">เบอร์โทรติดต่อ:</label>
-          <input type="tel" class="form-control" id="phoneNumber" name="phoneNumber" pattern="[0-9]{10}" required>
-          <div class="valid-feedback">ผ่าน</div>
-          <div class="invalid-feedback">กรุณาป้อนเบอร์โทรให้ครบ 10 หลัก</div>
-        </div>
+    <h2>ระบบจองคิวล่วงหน้า</h2>
+    <form id="queueForm">
         <input type="hidden" id="userId" name="userId">
-        <button type="submit" class="btn btn-primary bd-indigo-500 btn-block text-white"><i class="fas fa-paper-plane"></i> กดรับคิว</button>
-      </form>
-    </div>
-  </div>
+        
+        <label for="firstName">ชื่อ:</label><br>
+        <input type="text" id="firstName" name="firstName" required><br>
+        
+        <label for="lastName">นามสกุล:</label><br>
+        <input type="text" id="lastName" name="lastName" required><br>
+        
+        <label for="phone">เบอร์โทร:</label><br>
+        <input type="tel" id="phone" name="phone" required><br>
+        
+        <label for="symptoms">อาการ:</label><br>
+        <textarea id="symptoms" name="symptoms" required></textarea><br>
+        
+        <label for="date">เลือกวันที่:</label><br>
+        <input type="date" id="date" name="date" required><br>
+        
+        <label for="time">เลือกเวลา:</label><br>
+        <input type="time" id="time" name="time" required><br>
+        
+        <input type="submit" value="จองคิว">
+    </form>
 
-  <script>
-    async function initializeLiff() {
-      await liff.init({ liffId: '1654186914-NeyYjmZp' });
-      if (!liff.isLoggedIn()) {
-        liff.login();
-      } else {
-        getUserProfile();
-      }
-    }
+    <p id="statusMessage"></p>
 
-    async function getUserProfile() {
-      const profile = await liff.getProfile();
-      
-      document.getElementById('userId').value = profile.userId;
-    }
-
-    function submitForm(event) {
-      event.preventDefault(); // ป้องกันการส่งฟอร์มแบบปกติ
-
-      var name = document.getElementById('name').value;
-      var phoneNumber = document.getElementById('phoneNumber').value;
-      var userId = document.getElementById('userId').value;
-
-      Swal.fire({
-        title: 'กำลังส่งข้อมูล...',
-        allowOutsideClick: false,
-        didOpen: () => {
-          Swal.showLoading();
+    <script>
+        async function initializeLiff() {
+            try {
+                await liff.init({ liffId: "YOUR_LIFF_ID" });
+                if (liff.isLoggedIn()) {
+                    const profile = await liff.getProfile();
+                    document.getElementById('userId').value = profile.userId;
+                } else {
+                    liff.login();
+                }
+            } catch (error) {
+                console.error('LIFF initialization failed', error);
+            }
         }
-      });
 
-      fetch('https://script.google.com/macros/s/AKfycbwHuAbDGhIcS3H0DLLSMyMBbxmqv2lbwQYhzhz7R4HrYTxTUaVr1ZH_XL2CCb9y7-jp/exec', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
-        },
-        body: new URLSearchParams({
-          name: name,
-          phoneNumber: phoneNumber,
-          userId: userId
-        })
-      })
-      .then(response => response.json())
-      .then(data => {
-        Swal.close();
-        if (data.result === 'success') {
-          Swal.fire({
-            icon: 'success',
-            title: 'สำเร็จ!',
-            text: 'ลำดับคิวของคุณคือ ' + data.queueNumber,
-            confirmButtonText: 'ตกลง'
-          }).then(function() {
-            document.getElementById('queueForm').reset();
-          });
-        } else {
-          Swal.fire({
-            icon: 'error',
-            title: 'เกิดข้อผิดพลาด!',
-            text: data.error,
-            confirmButtonText: 'ตกลง'
-          });
-        }
-      })
-      .catch(error => {
-        Swal.close();
-        Swal.fire({
-          icon: 'error',
-          title: 'เกิดข้อผิดพลาด!',
-          text: error.message,
-          confirmButtonText: 'ตกลง'
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeLiff();
         });
-      });
-    }
 
-    function displayTodayDate() {
-      var today = new Date();
-      var day = today.getDate();
-      var month = today.getMonth() + 1;
-      var year = today.getFullYear();
-      
-      var dateString = padZero(day) + "/" + padZero(month) + "/" + year;
-      document.getElementById("date").innerText = "บัตรคิวประจำวันที่: " + dateString;
-    }
+        document.getElementById('queueForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+            document.getElementById('statusMessage').textContent = 'กำลังส่งข้อมูล...';
 
-    function padZero(num) {
-      return (num < 10) ? "0" + num : num;
-    }
+            var formData = new FormData(this);
 
-    window.onload = function() {
-      displayTodayDate();
-      initializeLiff();
-    };
-  </script>
+            fetch('https://YOUR_SCRIPT_URL', {
+                method: 'POST',
+                body: JSON.stringify(Object.fromEntries(formData)),
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            }).then(response => response.json())
+              .then(data => {
+                document.getElementById('statusMessage').textContent = 'แจ้งเตือนนัดสำเร็จ';
+                sendFlexMessage(data);
+                sendLineNotify(data);
+              }).catch(error => {
+                document.getElementById('statusMessage').textContent = 'เกิดข้อผิดพลาดในการส่งข้อมูล';
+              });
+        });
+
+        function sendFlexMessage(data) {
+            // ส่ง Flex Message ให้ลูกค้า
+        }
+
+        function sendLineNotify(data) {
+            // ส่งแจ้งเตือนร้านผ่าน LINE Notify
+        }
+    </script>
 
   <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.3/dist/umd/popper.min.js"></script>
   <script src="https://stackpath.herokuapp.com/bootstrap/5.0.0-alpha1/js/bootstrap.min.js"></script>
